@@ -3,8 +3,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,7 +28,7 @@ public class Person implements Comparable<Person>
     public Person(String firstName, String lastName, LocalDate birthDate, LocalDate deathDate) throws NegativeLifespanException
     {
         this(firstName, lastName, birthDate);
-        if (deathDate.isBefore(birthDate)) throw new NegativeLifespanException();
+        if (deathDate != null && deathDate.isBefore(birthDate)) throw new NegativeLifespanException(this);
         this.deathDate = deathDate;
     }
     public String getFirstName() { return firstName; }
@@ -36,7 +38,7 @@ public class Person implements Comparable<Person>
     public LocalDate getDeathDate() { return deathDate; }
     public boolean adopt(Person p) throws ParentingAgeException
     {
-        if (birthDate.getYear() - p.getBirthDate().getYear() <= 15) throw new ParentingAgeException();
+        if (deathDate != null && ChronoUnit.YEARS.between(birthDate, deathDate) <= 15) throw new ParentingAgeException();
         children.add(p);
         return true;
     }
@@ -52,7 +54,7 @@ public class Person implements Comparable<Person>
     @Override
     public String toString() 
     {
-        return firstName + ' ' + lastName + ' ' + birthDate.toString();
+        return firstName + ' ' + lastName + ", born " + birthDate.toString() + "\nchildren: " + children;
     }
     @Override
     public int compareTo(Person p) 
@@ -75,7 +77,8 @@ public class Person implements Comparable<Person>
         File f = new File(path);
         BufferedReader br = new BufferedReader(new FileReader(f));
         List<Person> ret = new ArrayList<Person>();
-        String[] lines = (String[])br.lines().toArray();
+        String[] lines = (String[])br.lines().skip(1).toArray(String[]::new);
+		
         for (String line : lines) 
         {
             Person p = fromCsvLine(line);
@@ -100,7 +103,10 @@ public class Person implements Comparable<Person>
                     }
                     catch (ParentingAgeException e)
                     {
-                        
+						System.out.println("Parent too young, continue anyway? [y/n]");
+						if (new BufferedReader(new InputStreamReader(System.in)).readLine().toLowerCase() != "y")
+							continue;
+						ret.get(i).children.add(ret.get(j));
                     }
                 }
             }

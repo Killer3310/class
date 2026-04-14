@@ -7,7 +7,10 @@ public class Family
 {
     private Map<String, List<Person>> name2person = new HashMap<String, List<Person>>();
     public List<Person> get(String name)
-    {
+	{
+		List<Person> p = name2person.get(name);
+		if (p == null)
+			return null;
         List<Person> ret = new ArrayList<Person>(name2person.get(name));
         ret.sort((Person a, Person b) -> { return a.getBirthDate().compareTo(b.getBirthDate()); });
         return ret;

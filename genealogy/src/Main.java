@@ -21,7 +21,7 @@ public class Main
         people2.get(0).adopt(people2.get(3));
         Family f = new Family();
         
-        f.add(people2.toArray(new Person[people2.size()]));
+        //f.add(people2.toArray(new Person[people2.size()]));
         
         System.out.println(f.get("Wawa1 Pluh"));
         System.out.println(people2.get(0).getYoungestChild());
